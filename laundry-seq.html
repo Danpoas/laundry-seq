@@ -6,7 +6,7 @@
 <title>LaundrySeq</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
-
+ 
   :root {
     --bg: #0d0f14;
     --surface: #151820;
@@ -21,9 +21,9 @@
     --text2: #8892a4;
     --text3: #4a5568;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     font-family: 'Syne', sans-serif;
     background: var(--bg);
@@ -31,7 +31,7 @@
     min-height: 100vh;
     padding-bottom: 80px;
   }
-
+ 
   /* HEADER */
   .header {
     background: var(--surface);
@@ -61,11 +61,11 @@
   .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .status-dot.error { background: var(--red); }
   .status-label { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
-
+ 
   /* PAGES */
   .page { display: none; padding: 20px; }
   .page.active { display: block; }
-
+ 
   /* SETUP PAGE */
   .setup-hero {
     text-align: center;
@@ -87,7 +87,7 @@
     font-size: 14px;
     line-height: 1.6;
   }
-
+ 
   .form-group { margin-bottom: 16px; }
   .form-label {
     font-size: 11px;
@@ -112,7 +112,7 @@
   }
   .form-input:focus { border-color: var(--accent); }
   .form-input::placeholder { color: var(--text3); }
-
+ 
   .btn {
     width: 100%;
     padding: 16px;
@@ -148,7 +148,7 @@
     font-size: 13px;
     border-radius: 8px;
   }
-
+ 
   .info-box {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -160,7 +160,7 @@
     line-height: 1.6;
   }
   .info-box a { color: var(--accent); text-decoration: none; }
-
+ 
   /* HOME PAGE */
   .section-title {
     font-size: 11px;
@@ -170,7 +170,7 @@
     color: var(--text3);
     margin-bottom: 14px;
   }
-
+ 
   /* MACHINE STATUS */
   .machine-card {
     background: var(--surface);
@@ -211,7 +211,7 @@
     font-family: 'DM Mono', monospace;
   }
   .machine-meta-item strong { color: var(--text); }
-
+ 
   /* RUNNING SEQUENCE */
   .running-card {
     background: linear-gradient(135deg, #0f1a2e, #0d1220);
@@ -275,7 +275,7 @@
   }
   .running-actions { display: flex; gap: 10px; margin-top: 16px; }
   .running-actions .btn { margin: 0; }
-
+ 
   /* SEQUENCES LIST */
   .seq-card {
     background: var(--surface);
@@ -312,7 +312,7 @@
   .icon-btn:active { transform: scale(0.9); }
   .icon-btn.play { background: var(--accent)22; border-color: var(--accent)66; color: var(--accent); }
   .icon-btn.del { background: var(--red)11; border-color: var(--red)33; color: var(--red); }
-
+ 
   .seq-steps-preview {
     display: flex;
     gap: 6px;
@@ -327,7 +327,7 @@
     font-family: 'DM Mono', monospace;
     color: var(--text2);
   }
-
+ 
   .fab {
     position: fixed;
     bottom: 24px;
@@ -349,7 +349,7 @@
     z-index: 50;
   }
   .fab:active { transform: scale(0.95); }
-
+ 
   /* CREATE SEQUENCE PAGE */
   .page-title {
     font-size: 24px;
@@ -362,7 +362,7 @@
     color: var(--text2);
     margin-bottom: 24px;
   }
-
+ 
   .steps-builder { margin-bottom: 20px; }
   .builder-step {
     background: var(--surface);
@@ -398,7 +398,7 @@
     transition: color 0.15s;
   }
   .builder-step-del:active { color: var(--red); }
-
+ 
   .add-step-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -414,7 +414,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
-
+ 
   .cycle-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -445,7 +445,7 @@
     font-family: 'DM Mono', monospace;
     color: var(--text3);
   }
-
+ 
   .options-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -473,7 +473,7 @@
     appearance: none;
   }
   .option-select:focus { border-color: var(--accent); }
-
+ 
   /* TOAST */
   .toast {
     position: fixed;
@@ -498,7 +498,7 @@
   .toast.success { border-color: var(--green)66; color: var(--green); }
   .toast.error { border-color: var(--red)66; color: var(--red); }
   .toast.info { border-color: var(--accent)66; color: var(--accent); }
-
+ 
   /* NAV */
   .bottom-nav {
     position: fixed;
@@ -522,7 +522,7 @@
   }
   .nav-item.active { color: var(--accent); }
   .nav-item .nav-icon { font-size: 20px; }
-
+ 
   /* MODAL */
   .modal-overlay {
     position: fixed;
@@ -553,7 +553,7 @@
     color: var(--text2);
     margin-bottom: 20px;
   }
-
+ 
   .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -561,7 +561,7 @@
   }
   .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
-
+ 
   .progress-bar-wrap {
     background: var(--surface2);
     border-radius: 4px;
@@ -575,7 +575,7 @@
     border-radius: 4px;
     transition: width 1s;
   }
-
+ 
   .remote-warning {
     background: var(--yellow)11;
     border: 1px solid var(--yellow)44;
@@ -589,7 +589,7 @@
 </style>
 </head>
 <body>
-
+ 
 <!-- HEADER -->
 <div class="header">
   <div class="header-logo">Laundry<span>Seq</span></div>
@@ -598,10 +598,10 @@
     <span class="status-label" id="statusLabel">sin conectar</span>
   </div>
 </div>
-
+ 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
+ 
 <!-- MODAL CONFIRMACIÓN -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
@@ -611,7 +611,7 @@
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
-
+ 
 <!-- PAGE: SETUP -->
 <div class="page active" id="page-setup">
   <div class="setup-hero">
@@ -619,25 +619,25 @@
     <h1>LaundrySeq</h1>
     <p>Encadena ciclos de lavado en<br>secuencias personalizadas</p>
   </div>
-
+ 
   <div class="info-box">
     Necesitas un token de SmartThings. Créalo en:<br>
     <a href="https://account.smartthings.com/tokens" target="_blank">account.smartthings.com/tokens</a><br><br>
     Permisos necesarios: <strong>List, See y Control devices</strong>
   </div>
-
+ 
   <div class="form-group">
     <label class="form-label">Token SmartThings</label>
     <input class="form-input" type="password" id="tokenInput" placeholder="Pega tu token aquí">
   </div>
-
+ 
   <button class="btn btn-primary" onclick="connectDevice()">Conectar lavadora</button>
   <button class="btn btn-secondary" onclick="loadDemo()">Ver demo sin token</button>
 </div>
-
+ 
 <!-- PAGE: HOME -->
 <div class="page" id="page-home">
-
+ 
   <!-- Estado lavadora -->
   <div class="machine-card">
     <div class="machine-name" id="machineName">Samsung Washer</div>
@@ -650,7 +650,7 @@
       <div class="progress-bar-fill" id="machineProgress" style="width:0%"></div>
     </div>
   </div>
-
+ 
   <!-- Secuencia en curso -->
   <div id="runningSection" style="display:none">
     <div class="section-title">En ejecución</div>
@@ -664,37 +664,37 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Mis secuencias -->
   <div class="section-title">Mis secuencias</div>
   <div id="seqList"></div>
-
+ 
   <button class="fab" onclick="showPage('create', true)">
     ＋ Nueva secuencia
   </button>
 </div>
-
+ 
 <!-- PAGE: CREATE -->
 <div class="page" id="page-create">
   <div class="page-title">Nueva secuencia</div>
   <div class="page-subtitle">Arma tu ciclo personalizado paso a paso</div>
-
+ 
   <div class="form-group">
     <label class="form-label">Nombre de la secuencia</label>
     <input class="form-input" type="text" id="seqName" placeholder="Ej: Ropa de cama">
   </div>
-
+ 
   <div class="section-title">Pasos agregados</div>
   <div class="steps-builder" id="stepsBuilder">
     <div class="empty-state" id="stepsEmpty" style="padding:20px">
       <p style="color:var(--text3);font-size:13px">Agrega ciclos desde el panel de abajo</p>
     </div>
   </div>
-
+ 
   <div class="add-step-panel">
     <div class="add-step-title">Agregar ciclo</div>
     <div class="cycle-grid" id="cycleGrid"></div>
-
+ 
     <div id="cycleOptions" style="display:none">
       <div class="options-row">
         <div class="option-group">
@@ -719,16 +719,16 @@
       <button class="btn btn-primary" onclick="addStep()">+ Agregar este paso</button>
     </div>
   </div>
-
+ 
   <button class="btn btn-primary" onclick="saveSequence()">💾 Guardar secuencia</button>
   <button class="btn btn-secondary" onclick="showPage('home')">Cancelar</button>
 </div>
-
+ 
 <!-- PAGE: SETTINGS -->
 <div class="page" id="page-settings">
   <div class="page-title">Ajustes</div>
   <div class="page-subtitle" style="margin-bottom:24px">Configuración de conexión</div>
-
+ 
   <div class="form-group">
     <label class="form-label">Token SmartThings</label>
     <input class="form-input" type="password" id="tokenDisplay" placeholder="Token guardado">
@@ -737,11 +737,11 @@
     <label class="form-label">Device ID Lavadora</label>
     <input class="form-input" type="text" id="deviceIdDisplay" style="font-size:11px" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
   </div>
-
+ 
   <button class="btn btn-primary" onclick="reconnect()">Guardar y reconectar</button>
   <button class="btn btn-danger" onclick="logout()">Desconectar y borrar todo</button>
 </div>
-
+ 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div class="nav-item active" id="nav-home" onclick="showPage('home')">
@@ -757,7 +757,7 @@
     <span>Ajustes</span>
   </div>
 </div>
-
+ 
 <script>
 // ============================================================
 // CICLOS REALES DE TU SAMSUNG WD14TP04DSX
@@ -788,11 +788,11 @@ const CYCLES = [
   { id: "39", name: "Solo secar",    type: "dryingOnly",  temps:[], spins:[], rinses:[], dry:["cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"none", defaultRinse:"0", defaultDry:"cupboard" },
   { id: "29", name: "Sanitizar",     type: "washingOnly", temps:["70"], spins:["1200"], rinses:["2"], dry:[], defaultTemp:"70", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
 ];
-
+ 
 const DEVICE_ID_DEFAULT = "2b9fef8b-f25b-390d-4b83-75c05a49bd8a";
 let DEVICE_ID = localStorage.getItem('st_device_id') || DEVICE_ID_DEFAULT;
 const ST_API = "https://api.smartthings.com/v1";
-
+ 
 // ============================================================
 // STATE
 // ============================================================
@@ -804,7 +804,7 @@ let selectedCycleId = null;
 let builderSteps = [];
 let monitorInterval = null;
 let demoMode = false;
-
+ 
 // ============================================================
 // INIT
 // ============================================================
@@ -817,7 +817,7 @@ window.onload = () => {
   renderSeqList();
   buildCycleGrid();
 };
-
+ 
 // ============================================================
 // PAGES
 // ============================================================
@@ -831,7 +831,7 @@ function showPage(name, resetCreate = false) {
   if (name === 'create' && resetCreate) resetBuilder();
   if (name === 'home') renderSeqList();
 }
-
+ 
 // ============================================================
 // CONNECTION
 // ============================================================
@@ -853,7 +853,7 @@ async function connectDevice() {
     showToast(e.message, 'error');
   }
 }
-
+ 
 function loadDemo() {
   demoMode = true;
   token = 'DEMO';
@@ -861,7 +861,7 @@ function loadDemo() {
   showPage('home');
   setDemoStatus();
 }
-
+ 
 function setDemoStatus() {
   document.getElementById('machineName').textContent = 'Samsung WD14TP04DSX (Demo)';
   document.getElementById('machineState').textContent = 'Detenida';
@@ -869,7 +869,7 @@ function setDemoStatus() {
   document.getElementById('machineTime').textContent = '—';
   setStatus('connected');
 }
-
+ 
 function reconnect() {
   const t = document.getElementById('tokenDisplay').value.trim();
   const d = document.getElementById('deviceIdDisplay').value.trim();
@@ -880,7 +880,7 @@ function reconnect() {
   startMonitor();
   showToast('Guardado y reconectando...', 'info');
 }
-
+ 
 function logout() {
   showConfirm('¿Borrar todo?', 'Se eliminarán el token, device ID y todas las secuencias guardadas.', () => {
     localStorage.clear();
@@ -893,14 +893,14 @@ function logout() {
     closeModal();
   });
 }
-
+ 
 function updateSettingsDisplay() {
   const td = document.getElementById('tokenDisplay');
   const dd = document.getElementById('deviceIdDisplay');
   if (td) td.value = token;
   if (dd) dd.value = DEVICE_ID;
 }
-
+ 
 // ============================================================
 // MONITOR
 // ============================================================
@@ -909,11 +909,11 @@ function startMonitor() {
   fetchStatus();
   monitorInterval = setInterval(fetchStatus, 3000);
 }
-
+ 
 function stopMonitor() {
   if (monitorInterval) clearInterval(monitorInterval);
 }
-
+ 
 async function fetchStatus() {
   if (demoMode) return;
   try {
@@ -929,32 +929,42 @@ async function fetchStatus() {
     setStatus('error');
   }
 }
-
+ 
 function updateMachineUI(data) {
   const main = data?.components?.main;
   if (!main) return;
-
+ 
   const op = main?.samsungce?.washerOperatingState || main?.washerOperatingState;
   const opState = main?.samsungce?.washerOperatingState;
-
+ 
   const machineState = main?.washerOperatingState?.machineState?.value || '—';
   const jobState = main?.samsungce?.washerOperatingState?.washerJobState?.value || main?.washerOperatingState?.washerJobState?.value || '—';
   const remaining = opState?.remainingTime?.value;
   const progress = opState?.progress?.value || 0;
-
+ 
   const stateMap = { stop:'Detenida', run:'Lavando', pause:'En pausa', ready:'Lista' };
   document.getElementById('machineState').textContent = stateMap[machineState] || machineState;
   document.getElementById('machinePhase').textContent = jobState !== 'none' ? jobState : '—';
   document.getElementById('machineTime').textContent = remaining ? `${remaining} min` : '—';
   document.getElementById('machineProgress').style.width = progress + '%';
 }
-
+ 
+let wasStarted = false; // indica si la lavadora llegó a estado "run" en el paso actual
+ 
 function checkSequenceProgress(data) {
   if (!activeSequence) return;
   const main = data?.components?.main;
   const machineState = main?.washerOperatingState?.machineState?.value;
-
-  if (machineState === 'stop' || machineState === 'ready') {
+ 
+  // Primero esperamos confirmar que arrancó (estado "run")
+  if (machineState === 'run') {
+    wasStarted = true;
+    return;
+  }
+ 
+  // Solo avanzamos si ya había arrancado y ahora está detenida
+  if (wasStarted && (machineState === 'stop' || machineState === 'ready')) {
+    wasStarted = false;
     const nextStep = currentStep + 1;
     if (nextStep < activeSequence.steps.length) {
       showToast(`✅ Paso ${currentStep + 1} listo → Iniciando paso ${nextStep + 1}`, 'success');
@@ -968,12 +978,11 @@ function checkSequenceProgress(data) {
       currentStep = 0;
       localStorage.removeItem('activeSeq');
       localStorage.removeItem('currentStep');
-      renderRunningSection();
     }
     renderRunningSection();
   }
 }
-
+ 
 // ============================================================
 // SEQUENCES
 // ============================================================
@@ -999,7 +1008,7 @@ function renderSeqList() {
     </div>
   `).join('');
 }
-
+ 
 function deleteSeq(i) {
   showConfirm('¿Eliminar secuencia?', `Se borrará "${sequences[i].name}" permanentemente.`, () => {
     sequences.splice(i, 1);
@@ -1009,7 +1018,7 @@ function deleteSeq(i) {
     showToast('Secuencia eliminada', 'info');
   });
 }
-
+ 
 function saveSequence() {
   const name = document.getElementById('seqName').value.trim();
   if (!name) { showToast('Ponle un nombre a la secuencia', 'error'); return; }
@@ -1022,21 +1031,21 @@ function saveSequence() {
   builderSteps = []; // limpiamos manualmente sin llamar resetBuilder
   showPage('home'); // home no toca el builder
 }
-
+ 
 function saveSequences() {
   localStorage.setItem('sequences', JSON.stringify(sequences));
 }
-
+ 
 function saveActiveSeq() {
   localStorage.setItem('activeSeq', JSON.stringify(activeSequence));
 }
-
+ 
 // ============================================================
 // RUN SEQUENCE
 // ============================================================
 async function startSequence(i) {
   if (!token || token === 'DEMO') { showToast('Conecta tu lavadora primero', 'error'); return; }
-
+ 
   const seq = sequences[i];
   showConfirm(`¿Iniciar "${seq.name}"?`,
     `Se ejecutarán ${seq.steps.length} ciclo(s) en secuencia automáticamente. Asegúrate de que el control remoto esté habilitado en la lavadora.`,
@@ -1051,12 +1060,15 @@ async function startSequence(i) {
     }
   );
 }
-
+ 
 async function launchStep(step) {
   const cycle = CYCLES.find(c => c.id === step.cycleId);
   if (!cycle) return;
-
-  const commands = [{
+ 
+  showToast(`⏳ Enviando: ${cycle.name}...`, 'info');
+ 
+  // Paso 1: Seleccionar el ciclo con sus opciones
+  const setCycleCmd = [{
     capability: "samsungce.washerCycle",
     command: "setCycle",
     arguments: [step.cycleId, {
@@ -1066,26 +1078,48 @@ async function launchStep(step) {
       dryingLevel: step.dry
     }]
   }];
-
+ 
   try {
-    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+    const res1 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands })
+      body: JSON.stringify({ commands: setCycleCmd })
     });
-
-    if (res.ok) {
-      showToast(`▶ Iniciando: ${cycle.name}`, 'info');
-    } else {
-      const err = await res.json();
-      // Intentar comando alternativo
+ 
+    if (!res1.ok) {
+      // Intentar con comando alternativo
       await launchStepAlt(step);
+      return;
     }
+ 
+    // Esperar 2 segundos y luego enviar Start
+    await new Promise(r => setTimeout(r, 2000));
+ 
+    // Paso 2: Enviar comando Start
+    const startCmd = [{
+      capability: "washerOperatingState",
+      command: "setMachineState",
+      arguments: ["run"]
+    }];
+ 
+    const res2 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands: startCmd })
+    });
+ 
+    if (res2.ok) {
+      showToast(`▶ ${cycle.name} iniciado`, 'success');
+      wasStarted = false; // reset para esperar confirmación de run
+    } else {
+      showToast('⚠️ Ciclo enviado. Presiona Start en la lavadora.', 'info');
+    }
+ 
   } catch(e) {
     showToast('Error al enviar comando', 'error');
   }
 }
-
+ 
 async function launchStepAlt(step) {
   // Comando alternativo usando custom.supportedOptions
   const commands = [{
@@ -1099,15 +1133,26 @@ async function launchStepAlt(step) {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ commands })
     });
-    if (res.ok) showToast(`▶ Ciclo enviado`, 'success');
-    else showToast('Activa el control remoto en la lavadora', 'error');
+    if (res.ok) {
+      await new Promise(r => setTimeout(r, 2000));
+      // Intentar start también
+      const startCmd = [{ capability: "washerOperatingState", command: "setMachineState", arguments: ["run"] }];
+      await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commands: startCmd })
+      });
+      showToast(`▶ Ciclo enviado`, 'success');
+    } else {
+      showToast('Activa el control remoto en la lavadora', 'error');
+    }
   } catch(e) {}
 }
-
+ 
 function pauseSequence() {
   showToast('Secuencia pausada. La lavadora continuará su ciclo actual.', 'info');
 }
-
+ 
 function stopSequence() {
   showConfirm('¿Detener secuencia?', 'La secuencia se cancelará. La lavadora terminará el ciclo actual.', () => {
     activeSequence = null;
@@ -1119,7 +1164,7 @@ function stopSequence() {
     showToast('Secuencia detenida', 'info');
   });
 }
-
+ 
 function renderRunningSection() {
   const section = document.getElementById('runningSection');
   if (!activeSequence) { section.style.display = 'none'; return; }
@@ -1137,7 +1182,7 @@ function renderRunningSection() {
     </li>`;
   }).join('');
 }
-
+ 
 // ============================================================
 // BUILDER
 // ============================================================
@@ -1151,26 +1196,26 @@ function buildCycleGrid() {
     </div>
   `).join('');
 }
-
+ 
 function selectCycle(id) {
   selectedCycleId = id;
   document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('cbtn-' + id).classList.add('selected');
-
+ 
   const cycle = CYCLES.find(c => c.id === id);
   document.getElementById('cycleOptions').style.display = 'block';
-
+ 
   const optTemp = document.getElementById('optTemp');
   const optSpin = document.getElementById('optSpin');
   const optRinse = document.getElementById('optRinse');
   const optDry = document.getElementById('optDry');
-
+ 
   optTemp.innerHTML = cycle.temps.length ? cycle.temps.map(t => `<option value="${t}" ${t===cycle.defaultTemp?'selected':''}>${t === 'none' ? 'Sin agua' : t === 'cold' ? 'Fría' : t+'°C'}</option>`).join('') : '<option value="none">No aplica</option>';
   optSpin.innerHTML = cycle.spins.length ? cycle.spins.map(s => `<option value="${s}" ${s===cycle.defaultSpin?'selected':''}>${s === 'rinseHold' ? 'Retención' : s === 'noSpin' ? 'Sin centri.' : s+' rpm'}</option>`).join('') : '<option value="none">No aplica</option>';
   optRinse.innerHTML = cycle.rinses.length ? cycle.rinses.map(r => `<option value="${r}" ${r===cycle.defaultRinse?'selected':''}>${r} enjuague${r!=='1'?'s':''}</option>`).join('') : '<option value="0">No aplica</option>';
   optDry.innerHTML = cycle.dry.length ? ['<option value="none">Sin secado</option>', ...cycle.dry.filter(d=>d!=='none').map(d => `<option value="${d}" ${d===cycle.defaultDry?'selected':''}>${d === 'cupboard' ? 'Armario' : d+'%'}</option>`)].join('') : '<option value="none">No aplica</option>';
 }
-
+ 
 function addStep() {
   if (!selectedCycleId) { showToast('Selecciona un ciclo', 'error'); return; }
   const step = {
@@ -1184,7 +1229,7 @@ function addStep() {
   renderBuilderSteps();
   showToast(`${getCycleName(selectedCycleId)} agregado`, 'success');
 }
-
+ 
 function renderBuilderSteps() {
   const container = document.getElementById('stepsBuilder');
   const empty = document.getElementById('stepsEmpty');
@@ -1209,12 +1254,12 @@ function renderBuilderSteps() {
     container.appendChild(div);
   });
 }
-
+ 
 function removeStep(i) {
   builderSteps.splice(i, 1);
   renderBuilderSteps();
 }
-
+ 
 function resetBuilder() {
   builderSteps = [];
   selectedCycleId = null;
@@ -1223,39 +1268,39 @@ function resetBuilder() {
   document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('selected'));
   renderBuilderSteps();
 }
-
+ 
 // ============================================================
 // HELPERS
 // ============================================================
 function getCycleName(id) {
   return CYCLES.find(c => c.id === id)?.name || id;
 }
-
+ 
 function setStatus(state) {
   const dot = document.getElementById('statusDot');
   const label = document.getElementById('statusLabel');
   dot.className = 'status-dot ' + state;
   label.textContent = state === 'connected' ? 'conectada' : state === 'error' ? 'sin conexión' : 'sin conectar';
 }
-
+ 
 function showToast(msg, type = 'info') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = `toast show ${type}`;
   setTimeout(() => t.className = 'toast', 3500);
 }
-
+ 
 function showConfirm(title, text, onOk) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmText').textContent = text;
   document.getElementById('confirmOk').onclick = onOk;
   document.getElementById('confirmModal').classList.add('show');
 }
-
+ 
 function closeModal() {
   document.getElementById('confirmModal').classList.remove('show');
 }
-
+ 
 // Restore active sequence on load
 if (localStorage.getItem('activeSeq')) {
   activeSequence = JSON.parse(localStorage.getItem('activeSeq'));
