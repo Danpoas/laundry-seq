@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LaundrySeq</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #4f9eff;
+    --accent2: #7c3aed;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e8eaf0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-logo {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .header-logo span { color: var(--accent); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    display: inline-block;
+    margin-right: 6px;
+    transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.error { background: var(--red); }
+  .status-label { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+
+  /* PAGES */
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+
+  /* SETUP PAGE */
+  .setup-hero {
+    text-align: center;
+    padding: 40px 0 32px;
+  }
+  .setup-hero .icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .setup-hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .setup-hero p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text3); }
+
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-top: 10px;
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red)44;
+    margin-top: 10px;
+  }
+  .btn-sm {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .info-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .info-box a { color: var(--accent); text-decoration: none; }
+
+  /* HOME PAGE */
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+
+  /* MACHINE STATUS */
+  .machine-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .machine-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .machine-name {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+  .machine-state {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .machine-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .machine-meta-item {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+  }
+  .machine-meta-item strong { color: var(--text); }
+
+  /* RUNNING SEQUENCE */
+  .running-card {
+    background: linear-gradient(135deg, #0f1a2e, #0d1220);
+    border: 1px solid var(--accent)44;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .running-title {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .running-seq-name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .step-list { list-style: none; }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+    color: var(--text2);
+  }
+  .step-num.done { background: var(--green)22; border-color: var(--green); color: var(--green); }
+  .step-num.active {
+    background: var(--accent)22;
+    border-color: var(--accent);
+    color: var(--accent);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent)44; }
+    50% { box-shadow: 0 0 0 6px transparent; }
+  }
+  .step-name { flex: 1; }
+  .step-name.done { color: var(--text2); text-decoration: line-through; }
+  .step-name.active { color: var(--text); font-weight: 600; }
+  .step-badge {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+  }
+  .running-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .running-actions .btn { margin: 0; }
+
+  /* SEQUENCES LIST */
+  .seq-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .seq-card:active { border-color: var(--accent); }
+  .seq-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .seq-card-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .seq-card-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .icon-btn:active { transform: scale(0.9); }
+  .icon-btn.play { background: var(--accent)22; border-color: var(--accent)66; color: var(--accent); }
+  .icon-btn.del { background: var(--red)11; border-color: var(--red)33; color: var(--red); }
+
+  .seq-steps-preview {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .step-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text2);
+  }
+
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 14px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 24px var(--accent)66;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    z-index: 50;
+  }
+  .fab:active { transform: scale(0.95); }
+
+  /* CREATE SEQUENCE PAGE */
+  .page-title {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 6px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  .steps-builder { margin-bottom: 20px; }
+  .builder-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .builder-step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent)22;
+    border: 1px solid var(--accent)66;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+  .builder-step-info { flex: 1; }
+  .builder-step-name { font-size: 14px; font-weight: 600; }
+  .builder-step-opts { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .builder-step-del {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    transition: color 0.15s;
+  }
+  .builder-step-del:active { color: var(--red); }
+
+  .add-step-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .add-step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .cycle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .cycle-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .cycle-btn:active, .cycle-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent)11;
+  }
+  .cycle-btn-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .cycle-btn-type {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+  }
+
+  .options-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .option-group { }
+  .option-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    display: block;
+    font-family: 'DM Mono', monospace;
+  }
+  .option-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    outline: none;
+    appearance: none;
+  }
+  .option-select:focus { border-color: var(--accent); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success { border-color: var(--green)66; color: var(--green); }
+  .toast.error { border-color: var(--red)66; color: var(--red); }
+  .toast.info { border-color: var(--accent)66; color: var(--accent); }
+
+  /* NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: color 0.15s;
+    color: var(--text3);
+    font-size: 10px;
+    gap: 4px;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-item .nav-icon { font-size: 20px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    z-index: 300;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .modal-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 4px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 1s;
+  }
+
+  .remote-warning {
+    background: var(--yellow)11;
+    border: 1px solid var(--yellow)44;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--yellow);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">Laundry<span>Seq</span></div>
+  <div>
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-label" id="statusLabel">sin conectar</span>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title" id="confirmTitle">¿Confirmar?</div>
+    <div class="modal-sub" id="confirmText"></div>
+    <button class="btn btn-primary" id="confirmOk">Confirmar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- PAGE: SETUP -->
+<div class="page active" id="page-setup">
+  <div class="setup-hero">
+    <span class="icon">🌊</span>
+    <h1>LaundrySeq</h1>
+    <p>Encadena ciclos de lavado en<br>secuencias personalizadas</p>
+  </div>
+
+  <div class="info-box">
+    Necesitas un token de SmartThings. Créalo en:<br>
+    <a href="https://account.smartthings.com/tokens" target="_blank">account.smartthings.com/tokens</a><br><br>
+    Permisos necesarios: <strong>List, See y Control devices</strong>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Token SmartThings</label>
+    <input class="form-input" type="password" id="tokenInput" placeholder="Pega tu token aquí">
+  </div>
+
+  <button class="btn btn-primary" onclick="connectDevice()">Conectar lavadora</button>
+  <button class="btn btn-secondary" onclick="loadDemo()">Ver demo sin token</button>
+</div>
+
+<!-- PAGE: HOME -->
+<div class="page" id="page-home">
+
+  <!-- Estado lavadora -->
+  <div class="machine-card">
+    <div class="machine-name" id="machineName">Samsung Washer</div>
+    <div class="machine-state" id="machineState">—</div>
+    <div class="machine-meta">
+      <div class="machine-meta-item">Fase: <strong id="machinePhase">—</strong></div>
+      <div class="machine-meta-item">Restante: <strong id="machineTime">—</strong></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="machineProgress" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Secuencia en curso -->
+  <div id="runningSection" style="display:none">
+    <div class="section-title">En ejecución</div>
+    <div class="running-card">
+      <div class="running-title">SECUENCIA ACTIVA</div>
+      <div class="running-seq-name" id="runningName"></div>
+      <ul class="step-list" id="runningSteps"></ul>
+      <div class="running-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="pauseSequence()">⏸ Pausar</button>
+        <button class="btn btn-danger" style="flex:1;margin:0" onclick="stopSequence()">⏹ Detener</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mis secuencias -->
+  <div class="section-title">Mis secuencias</div>
+  <div id="seqList"></div>
+
+  <button class="fab" onclick="showPage('create', true)">
+    ＋ Nueva secuencia
+  </button>
+</div>
+
+<!-- PAGE: CREATE -->
+<div class="page" id="page-create">
+  <div class="page-title">Nueva secuencia</div>
+  <div class="page-subtitle">Arma tu ciclo personalizado paso a paso</div>
+
+  <div class="form-group">
+    <label class="form-label">Nombre de la secuencia</label>
+    <input class="form-input" type="text" id="seqName" placeholder="Ej: Ropa de cama">
+  </div>
+
+  <div class="section-title">Pasos agregados</div>
+  <div class="steps-builder" id="stepsBuilder">
+    <div class="empty-state" id="stepsEmpty" style="padding:20px">
+      <p style="color:var(--text3);font-size:13px">Agrega ciclos desde el panel de abajo</p>
+    </div>
+  </div>
+
+  <div class="add-step-panel">
+    <div class="add-step-title">Agregar ciclo</div>
+    <div class="cycle-grid" id="cycleGrid"></div>
+
+    <div id="cycleOptions" style="display:none">
+      <div class="options-row">
+        <div class="option-group">
+          <label class="option-label">Temperatura</label>
+          <select class="option-select" id="optTemp"></select>
+        </div>
+        <div class="option-group">
+          <label class="option-label">Centrifugado</label>
+          <select class="option-select" id="optSpin"></select>
+        </div>
+      </div>
+      <div class="options-row">
+        <div class="option-group">
+          <label class="option-label">Enjuagues</label>
+          <select class="option-select" id="optRinse"></select>
+        </div>
+        <div class="option-group">
+          <label class="option-label">Nivel secado</label>
+          <select class="option-select" id="optDry"></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addStep()">+ Agregar este paso</button>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="saveSequence()">💾 Guardar secuencia</button>
+  <button class="btn btn-secondary" onclick="showPage('home')">Cancelar</button>
+</div>
+
+<!-- PAGE: SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Ajustes</div>
+  <div class="page-subtitle" style="margin-bottom:24px">Configuración de conexión</div>
+
+  <div class="form-group">
+    <label class="form-label">Token SmartThings</label>
+    <input class="form-input" type="password" id="tokenDisplay" placeholder="Token guardado">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Device ID Lavadora</label>
+    <input class="form-input" type="text" id="deviceIdDisplay" style="font-size:11px" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+  </div>
+
+  <button class="btn btn-primary" onclick="reconnect()">Guardar y reconectar</button>
+  <button class="btn btn-danger" onclick="logout()">Desconectar y borrar todo</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="showPage('home')">
+    <span class="nav-icon">🏠</span>
+    <span>Inicio</span>
+  </div>
+  <div class="nav-item" id="nav-create" onclick="showPage('create', true)">
+    <span class="nav-icon">➕</span>
+    <span>Crear</span>
+  </div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
+    <span class="nav-icon">⚙️</span>
+    <span>Ajustes</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CICLOS REALES DE TU SAMSUNG WD14TP04DSX
+// ============================================================
+const CYCLES = [
+  { id: "1B", name: "Algodón",       type: "allInOne",    temps:["cold","20","30","40","60","90"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"60", defaultSpin:"1400", defaultRinse:"5", defaultDry:"none" },
+  { id: "20", name: "Algodón ECO",   type: "allInOne",    temps:["cold","20","30","40","60","90"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"60", defaultSpin:"1400", defaultRinse:"5", defaultDry:"none" },
+  { id: "1E", name: "Sintéticos",    type: "allInOne",    temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800","1000","1200"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"cold", defaultSpin:"1200", defaultRinse:"3", defaultDry:"none" },
+  { id: "1D", name: "Ropa de cama",  type: "allInOne",    temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"40", defaultSpin:"1400", defaultRinse:"2", defaultDry:"none" },
+  { id: "35", name: "Mix (colores)", type: "allInOne",    temps:["cold","20","30","40","60"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"40", defaultSpin:"1400", defaultRinse:"2", defaultDry:"none" },
+  { id: "25", name: "Ropa deportiva",type: "allInOne",    temps:["cold","20","30","40","60"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"40", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
+  { id: "26", name: "Lana/Delicados",type: "allInOne",    temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400"], rinses:["0","1","2","3"], dry:["none","cupboard","30","60","90"], defaultTemp:"30", defaultSpin:"400", defaultRinse:"2", defaultDry:"none" },
+  { id: "1F", name: "Lavado rápido", type: "allInOne",    temps:["cold"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"cold", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
+  { id: "33", name: "Super Speed",   type: "washingOnly", temps:["cold","20","30","40","60","90"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"60", defaultSpin:"1400", defaultRinse:"5", defaultDry:"none" },
+  { id: "23", name: "Bebé/Higiénico",type: "allInOne",    temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3"], dry:["none","cupboard","30","60","90"], defaultTemp:"30", defaultSpin:"1200", defaultRinse:"3", defaultDry:"none" },
+  { id: "22", name: "Aclarado",      type: "washingOnly", temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800"], rinses:["0","1","2","3"], dry:[], defaultTemp:"40", defaultSpin:"800", defaultRinse:"2", defaultDry:"none" },
+  { id: "32", name: "Denim/Jeans",   type: "washingOnly", temps:["cold","20","30","40","60"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"30", defaultSpin:"800", defaultRinse:"2", defaultDry:"none" },
+  { id: "21", name: "Oscuros",       type: "washingOnly", temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"40", defaultSpin:"1200", defaultRinse:"4", defaultDry:"none" },
+  { id: "2F", name: "Anti-alergias", type: "washingOnly", temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"40", defaultSpin:"800", defaultRinse:"5", defaultDry:"none" },
+  { id: "30", name: "Camisas",       type: "washingOnly", temps:["cold","20","30","40","60"], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"40", defaultSpin:"1400", defaultRinse:"2", defaultDry:"none" },
+  { id: "2D", name: "Ropa interior", type: "washingOnly", temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"40", defaultSpin:"800", defaultRinse:"2", defaultDry:"none" },
+  { id: "24", name: "Lavado suave",  type: "washingOnly", temps:["cold","20","30","40"], spins:["rinseHold","noSpin","400","800"], rinses:["0","1","2","3"], dry:[], defaultTemp:"40", defaultSpin:"800", defaultRinse:"3", defaultDry:"none" },
+  { id: "27", name: "Air Wash",      type: "allInOne",    temps:[], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:["none","cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"1400", defaultRinse:"2", defaultDry:"none" },
+  { id: "28", name: "Vapor",         type: "allInOne",    temps:[], spins:["noSpin","400","800","1000","1200","1400"], rinses:[], dry:["none","cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"1400", defaultRinse:"0", defaultDry:"none" },
+  { id: "36", name: "Lavar+Secar",   type: "allInOne",    temps:[], spins:["1400"], rinses:["0","1","2","3","4","5"], dry:["cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"1400", defaultRinse:"2", defaultDry:"cupboard" },
+  { id: "38", name: "Refrescar",     type: "allInOne",    temps:[], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:[], dry:["cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"rinseHold", defaultRinse:"0", defaultDry:"cupboard" },
+  { id: "37", name: "Enjuague + Centrifugado", type: "washingOnly", temps:[], spins:["rinseHold","noSpin","400","800","1000","1200","1400"], rinses:["0","1","2","3","4","5"], dry:[], defaultTemp:"none", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
+  { id: "39", name: "Solo secar",    type: "dryingOnly",  temps:[], spins:[], rinses:[], dry:["cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"none", defaultRinse:"0", defaultDry:"cupboard" },
+  { id: "29", name: "Sanitizar",     type: "washingOnly", temps:["70"], spins:["1200"], rinses:["2"], dry:[], defaultTemp:"70", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
+];
+
+const DEVICE_ID_DEFAULT = "2b9fef8b-f25b-390d-4b83-75c05a49bd8a";
+let DEVICE_ID = localStorage.getItem('st_device_id') || DEVICE_ID_DEFAULT;
+const ST_API = "https://api.smartthings.com/v1";
+
+// ============================================================
+// STATE
+// ============================================================
+let token = localStorage.getItem('st_token') || '';
+let sequences = JSON.parse(localStorage.getItem('sequences') || '[]');
+let activeSequence = JSON.parse(localStorage.getItem('activeSeq') || 'null');
+let currentStep = parseInt(localStorage.getItem('currentStep') || '0');
+let selectedCycleId = null;
+let builderSteps = [];
+let monitorInterval = null;
+let demoMode = false;
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => {
+  if (token) {
+    showPage('home');
+    updateSettingsDisplay();
+    startMonitor();
+  }
+  renderSeqList();
+  buildCycleGrid();
+};
+
+// ============================================================
+// PAGES
+// ============================================================
+function showPage(name, resetCreate = false) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  // Solo resetea el builder si se navega al create desde nav o botón nuevo
+  if (name === 'create' && resetCreate) resetBuilder();
+  if (name === 'home') renderSeqList();
+}
+
+// ============================================================
+// CONNECTION
+// ============================================================
+async function connectDevice() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) { showToast('Ingresa tu token', 'error'); return; }
+  token = t;
+  try {
+    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/status`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Token inválido o sin permisos');
+    localStorage.setItem('st_token', token);
+    showToast('¡Lavadora conectada!', 'success');
+    showPage('home');
+    updateSettingsDisplay();
+    startMonitor();
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+}
+
+function loadDemo() {
+  demoMode = true;
+  token = 'DEMO';
+  showToast('Modo demo activado', 'info');
+  showPage('home');
+  setDemoStatus();
+}
+
+function setDemoStatus() {
+  document.getElementById('machineName').textContent = 'Samsung WD14TP04DSX (Demo)';
+  document.getElementById('machineState').textContent = 'Detenida';
+  document.getElementById('machinePhase').textContent = '—';
+  document.getElementById('machineTime').textContent = '—';
+  setStatus('connected');
+}
+
+function reconnect() {
+  const t = document.getElementById('tokenDisplay').value.trim();
+  const d = document.getElementById('deviceIdDisplay').value.trim();
+  if (t) { token = t; localStorage.setItem('st_token', token); }
+  if (d) { DEVICE_ID = d; localStorage.setItem('st_device_id', DEVICE_ID); }
+  if (!token) { showToast('Ingresa tu token primero', 'error'); return; }
+  if (!DEVICE_ID) { showToast('Ingresa el Device ID', 'error'); return; }
+  startMonitor();
+  showToast('Guardado y reconectando...', 'info');
+}
+
+function logout() {
+  showConfirm('¿Borrar todo?', 'Se eliminarán el token, device ID y todas las secuencias guardadas.', () => {
+    localStorage.clear();
+    token = '';
+    DEVICE_ID = DEVICE_ID_DEFAULT;
+    sequences = [];
+    activeSequence = null;
+    stopMonitor();
+    showPage('setup');
+    closeModal();
+  });
+}
+
+function updateSettingsDisplay() {
+  const td = document.getElementById('tokenDisplay');
+  const dd = document.getElementById('deviceIdDisplay');
+  if (td) td.value = token;
+  if (dd) dd.value = DEVICE_ID;
+}
+
+// ============================================================
+// MONITOR
+// ============================================================
+function startMonitor() {
+  stopMonitor();
+  fetchStatus();
+  monitorInterval = setInterval(fetchStatus, 3000);
+}
+
+function stopMonitor() {
+  if (monitorInterval) clearInterval(monitorInterval);
+}
+
+async function fetchStatus() {
+  if (demoMode) return;
+  try {
+    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/status`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) { setStatus('error'); return; }
+    const data = await res.json();
+    setStatus('connected');
+    updateMachineUI(data);
+    checkSequenceProgress(data);
+  } catch(e) {
+    setStatus('error');
+  }
+}
+
+function updateMachineUI(data) {
+  const main = data?.components?.main;
+  if (!main) return;
+
+  const op = main?.samsungce?.washerOperatingState || main?.washerOperatingState;
+  const opState = main?.samsungce?.washerOperatingState;
+
+  const machineState = main?.washerOperatingState?.machineState?.value || '—';
+  const jobState = main?.samsungce?.washerOperatingState?.washerJobState?.value || main?.washerOperatingState?.washerJobState?.value || '—';
+  const remaining = opState?.remainingTime?.value;
+  const progress = opState?.progress?.value || 0;
+
+  const stateMap = { stop:'Detenida', run:'Lavando', pause:'En pausa', ready:'Lista' };
+  document.getElementById('machineState').textContent = stateMap[machineState] || machineState;
+  document.getElementById('machinePhase').textContent = jobState !== 'none' ? jobState : '—';
+  document.getElementById('machineTime').textContent = remaining ? `${remaining} min` : '—';
+  document.getElementById('machineProgress').style.width = progress + '%';
+}
+
+function checkSequenceProgress(data) {
+  if (!activeSequence) return;
+  const main = data?.components?.main;
+  const machineState = main?.washerOperatingState?.machineState?.value;
+
+  if (machineState === 'stop' || machineState === 'ready') {
+    const nextStep = currentStep + 1;
+    if (nextStep < activeSequence.steps.length) {
+      showToast(`✅ Paso ${currentStep + 1} listo → Iniciando paso ${nextStep + 1}`, 'success');
+      currentStep = nextStep;
+      localStorage.setItem('currentStep', currentStep);
+      saveActiveSeq();
+      setTimeout(() => launchStep(activeSequence.steps[currentStep]), 1000);
+    } else {
+      showToast('🎉 ¡Secuencia completada!', 'success');
+      activeSequence = null;
+      currentStep = 0;
+      localStorage.removeItem('activeSeq');
+      localStorage.removeItem('currentStep');
+      renderRunningSection();
+    }
+    renderRunningSection();
+  }
+}
+
+// ============================================================
+// SEQUENCES
+// ============================================================
+function renderSeqList() {
+  const container = document.getElementById('seqList');
+  if (!container) return;
+  if (sequences.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🧺</div><p>Aún no tienes secuencias.<br>Crea tu primera arriba.</p></div>`;
+    return;
+  }
+  container.innerHTML = sequences.map((seq, i) => `
+    <div class="seq-card">
+      <div class="seq-card-header">
+        <div class="seq-card-name">${seq.name}</div>
+        <div class="seq-card-actions">
+          <div class="icon-btn play" onclick="startSequence(${i})">▶</div>
+          <div class="icon-btn del" onclick="deleteSeq(${i})">🗑</div>
+        </div>
+      </div>
+      <div class="seq-steps-preview">
+        ${seq.steps.map(s => `<span class="step-tag">${getCycleName(s.cycleId)}</span>`).join('<span style="color:var(--text3);font-size:14px;align-self:center">→</span>')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteSeq(i) {
+  showConfirm('¿Eliminar secuencia?', `Se borrará "${sequences[i].name}" permanentemente.`, () => {
+    sequences.splice(i, 1);
+    saveSequences();
+    renderSeqList();
+    closeModal();
+    showToast('Secuencia eliminada', 'info');
+  });
+}
+
+function saveSequence() {
+  const name = document.getElementById('seqName').value.trim();
+  if (!name) { showToast('Ponle un nombre a la secuencia', 'error'); return; }
+  if (builderSteps.length === 0) { showToast('Agrega al menos un paso', 'error'); return; }
+  // Guardamos primero, LUEGO navegamos
+  const stepsSnapshot = JSON.parse(JSON.stringify(builderSteps));
+  sequences.push({ name, steps: stepsSnapshot });
+  saveSequences();
+  showToast(`"${name}" guardada ✓`, 'success');
+  builderSteps = []; // limpiamos manualmente sin llamar resetBuilder
+  showPage('home'); // home no toca el builder
+}
+
+function saveSequences() {
+  localStorage.setItem('sequences', JSON.stringify(sequences));
+}
+
+function saveActiveSeq() {
+  localStorage.setItem('activeSeq', JSON.stringify(activeSequence));
+}
+
+// ============================================================
+// RUN SEQUENCE
+// ============================================================
+async function startSequence(i) {
+  if (!token || token === 'DEMO') { showToast('Conecta tu lavadora primero', 'error'); return; }
+
+  const seq = sequences[i];
+  showConfirm(`¿Iniciar "${seq.name}"?`,
+    `Se ejecutarán ${seq.steps.length} ciclo(s) en secuencia automáticamente. Asegúrate de que el control remoto esté habilitado en la lavadora.`,
+    async () => {
+      closeModal();
+      activeSequence = seq;
+      currentStep = 0;
+      saveActiveSeq();
+      localStorage.setItem('currentStep', 0);
+      renderRunningSection();
+      await launchStep(seq.steps[0]);
+    }
+  );
+}
+
+async function launchStep(step) {
+  const cycle = CYCLES.find(c => c.id === step.cycleId);
+  if (!cycle) return;
+
+  const commands = [{
+    capability: "samsungce.washerCycle",
+    command: "setCycle",
+    arguments: [step.cycleId, {
+      waterTemperature: step.temp,
+      spinLevel: step.spin,
+      rinseCycle: parseInt(step.rinse),
+      dryingLevel: step.dry
+    }]
+  }];
+
+  try {
+    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands })
+    });
+
+    if (res.ok) {
+      showToast(`▶ Iniciando: ${cycle.name}`, 'info');
+    } else {
+      const err = await res.json();
+      // Intentar comando alternativo
+      await launchStepAlt(step);
+    }
+  } catch(e) {
+    showToast('Error al enviar comando', 'error');
+  }
+}
+
+async function launchStepAlt(step) {
+  // Comando alternativo usando custom.supportedOptions
+  const commands = [{
+    capability: "custom.supportedOptions",
+    command: "selectCourse",
+    arguments: [step.cycleId]
+  }];
+  try {
+    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands })
+    });
+    if (res.ok) showToast(`▶ Ciclo enviado`, 'success');
+    else showToast('Activa el control remoto en la lavadora', 'error');
+  } catch(e) {}
+}
+
+function pauseSequence() {
+  showToast('Secuencia pausada. La lavadora continuará su ciclo actual.', 'info');
+}
+
+function stopSequence() {
+  showConfirm('¿Detener secuencia?', 'La secuencia se cancelará. La lavadora terminará el ciclo actual.', () => {
+    activeSequence = null;
+    currentStep = 0;
+    localStorage.removeItem('activeSeq');
+    localStorage.removeItem('currentStep');
+    renderRunningSection();
+    closeModal();
+    showToast('Secuencia detenida', 'info');
+  });
+}
+
+function renderRunningSection() {
+  const section = document.getElementById('runningSection');
+  if (!activeSequence) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  document.getElementById('runningName').textContent = activeSequence.name;
+  const list = document.getElementById('runningSteps');
+  list.innerHTML = activeSequence.steps.map((s, i) => {
+    const done = i < currentStep;
+    const active = i === currentStep;
+    const cycle = getCycleName(s.cycleId);
+    return `<li class="step-item">
+      <div class="step-num ${done?'done':active?'active':''}">${done?'✓':i+1}</div>
+      <div class="step-name ${done?'done':active?'active':''}">${cycle}</div>
+      <div class="step-badge">${s.temp !== 'none' ? s.temp+'°' : ''} ${s.spin !== 'none' ? s.spin+'rpm' : ''}</div>
+    </li>`;
+  }).join('');
+}
+
+// ============================================================
+// BUILDER
+// ============================================================
+function buildCycleGrid() {
+  const grid = document.getElementById('cycleGrid');
+  if (!grid) return;
+  grid.innerHTML = CYCLES.map(c => `
+    <div class="cycle-btn" id="cbtn-${c.id}" onclick="selectCycle('${c.id}')">
+      <div class="cycle-btn-name">${c.name}</div>
+      <div class="cycle-btn-type">${c.type === 'allInOne' ? 'Lavar+Secar' : c.type === 'dryingOnly' ? 'Solo secar' : 'Solo lavar'}</div>
+    </div>
+  `).join('');
+}
+
+function selectCycle(id) {
+  selectedCycleId = id;
+  document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('cbtn-' + id).classList.add('selected');
+
+  const cycle = CYCLES.find(c => c.id === id);
+  document.getElementById('cycleOptions').style.display = 'block';
+
+  const optTemp = document.getElementById('optTemp');
+  const optSpin = document.getElementById('optSpin');
+  const optRinse = document.getElementById('optRinse');
+  const optDry = document.getElementById('optDry');
+
+  optTemp.innerHTML = cycle.temps.length ? cycle.temps.map(t => `<option value="${t}" ${t===cycle.defaultTemp?'selected':''}>${t === 'none' ? 'Sin agua' : t === 'cold' ? 'Fría' : t+'°C'}</option>`).join('') : '<option value="none">No aplica</option>';
+  optSpin.innerHTML = cycle.spins.length ? cycle.spins.map(s => `<option value="${s}" ${s===cycle.defaultSpin?'selected':''}>${s === 'rinseHold' ? 'Retención' : s === 'noSpin' ? 'Sin centri.' : s+' rpm'}</option>`).join('') : '<option value="none">No aplica</option>';
+  optRinse.innerHTML = cycle.rinses.length ? cycle.rinses.map(r => `<option value="${r}" ${r===cycle.defaultRinse?'selected':''}>${r} enjuague${r!=='1'?'s':''}</option>`).join('') : '<option value="0">No aplica</option>';
+  optDry.innerHTML = cycle.dry.length ? ['<option value="none">Sin secado</option>', ...cycle.dry.filter(d=>d!=='none').map(d => `<option value="${d}" ${d===cycle.defaultDry?'selected':''}>${d === 'cupboard' ? 'Armario' : d+'%'}</option>`)].join('') : '<option value="none">No aplica</option>';
+}
+
+function addStep() {
+  if (!selectedCycleId) { showToast('Selecciona un ciclo', 'error'); return; }
+  const step = {
+    cycleId: selectedCycleId,
+    temp: document.getElementById('optTemp').value,
+    spin: document.getElementById('optSpin').value,
+    rinse: document.getElementById('optRinse').value,
+    dry: document.getElementById('optDry').value,
+  };
+  builderSteps.push(step);
+  renderBuilderSteps();
+  showToast(`${getCycleName(selectedCycleId)} agregado`, 'success');
+}
+
+function renderBuilderSteps() {
+  const container = document.getElementById('stepsBuilder');
+  const empty = document.getElementById('stepsEmpty');
+  if (builderSteps.length === 0) {
+    if (empty) empty.style.display = 'block';
+    container.querySelectorAll('.builder-step').forEach(e => e.remove());
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  container.querySelectorAll('.builder-step').forEach(e => e.remove());
+  builderSteps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'builder-step';
+    div.innerHTML = `
+      <div class="builder-step-num">${i+1}</div>
+      <div class="builder-step-info">
+        <div class="builder-step-name">${getCycleName(s.cycleId)}</div>
+        <div class="builder-step-opts">${s.temp !== 'none' ? s.temp+'°' : ''} · ${s.spin !== 'none' ? s.spin : ''} · ${s.rinse} enjuagues ${s.dry !== 'none' ? '· secar '+s.dry : ''}</div>
+      </div>
+      <button class="builder-step-del" onclick="removeStep(${i})">×</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function removeStep(i) {
+  builderSteps.splice(i, 1);
+  renderBuilderSteps();
+}
+
+function resetBuilder() {
+  builderSteps = [];
+  selectedCycleId = null;
+  document.getElementById('seqName').value = '';
+  document.getElementById('cycleOptions').style.display = 'none';
+  document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('selected'));
+  renderBuilderSteps();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getCycleName(id) {
+  return CYCLES.find(c => c.id === id)?.name || id;
+}
+
+function setStatus(state) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  dot.className = 'status-dot ' + state;
+  label.textContent = state === 'connected' ? 'conectada' : state === 'error' ? 'sin conexión' : 'sin conectar';
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+function showConfirm(title, text, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmOk').onclick = onOk;
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+// Restore active sequence on load
+if (localStorage.getItem('activeSeq')) {
+  activeSequence = JSON.parse(localStorage.getItem('activeSeq'));
+  currentStep = parseInt(localStorage.getItem('currentStep') || '0');
+  setTimeout(renderRunningSection, 500);
+}
+</script>
+</body>
+</html>
