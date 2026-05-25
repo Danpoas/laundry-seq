@@ -1102,68 +1102,73 @@ async function launchStep(step) {
  
   showToast(`⏳ Enviando: ${cycle.name}...`, 'info');
  
-  // Construir opciones del ciclo
-  const cycleOptions = {};
-  if (step.temp && step.temp !== 'none') cycleOptions.waterTemperature = step.temp;
-  if (step.spin && step.spin !== 'none') cycleOptions.spinLevel = step.spin;
-  if (step.rinse) cycleOptions.rinseCycle = parseInt(step.rinse);
-  if (step.dry && step.dry !== 'none') cycleOptions.dryingLevel = step.dry;
- 
-  // Enviar ciclo + arranque en un solo comando combinado
-  const commands = [
-    {
-      capability: "samsungce.washerCycle",
-      command: "setCycle",
-      arguments: [step.cycleId, cycleOptions]
-    },
-  ];
- 
   try {
+    // Paso 1: Seleccionar el curso con el comando correcto para este modelo
     const res1 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands })
+      body: JSON.stringify({ commands: [{
+        capability: "custom.supportedOptions",
+        command: "selectCourse",
+        arguments: [step.cycleId]
+      }]})
     });
- 
     const data1 = await res1.json();
-    console.log('setCycle response:', JSON.stringify(data1));
- 
+    console.log('selectCourse:', JSON.stringify(data1));
     if (!res1.ok) {
-      showToast(`Error setCycle: ${data1?.message || res1.status}`, 'error');
+      showToast(`Error: ${data1?.error?.message || res1.status}`, 'error');
       return;
     }
  
-    // Esperar 2.5 segundos para que la lavadora procese el ciclo
+    // Esperar que la lavadora procese el ciclo seleccionado
     await new Promise(r => setTimeout(r, 2500));
  
-    // Comando de arranque — Samsung WD usa operatingState start
-    const startCommands = [
-      {
-        capability: "samsungce.washerOperatingState",
-        command: "start",
-        arguments: []
-      }
+    // Paso 2: Enviar opciones del ciclo
+    const options = {};
+    if (step.temp && step.temp !== 'none') options.waterTemperature = step.temp;
+    if (step.spin && step.spin !== 'none') options.spinLevel = step.spin;
+    if (step.rinse) options.rinseCycle = parseInt(step.rinse);
+    if (step.dry && step.dry !== 'none') options.dryingLevel = step.dry;
+ 
+    if (Object.keys(options).length > 0) {
+      const res2 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commands: [{
+          capability: "samsungce.washerCycle",
+          command: "setCycleOptions",
+          arguments: [options]
+        }]})
+      });
+      const data2 = await res2.json();
+      console.log('setCycleOptions:', JSON.stringify(data2));
+    }
+ 
+    await new Promise(r => setTimeout(r, 1000));
+ 
+    // Paso 3: Arrancar
+    const startCmds = [
+      { capability: "samsungce.washerOperatingState", command: "start", arguments: [] },
     ];
  
-    const res2 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+    const res3 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands: startCommands })
+      body: JSON.stringify({ commands: startCmds })
     });
+    const data3 = await res3.json();
+    console.log('start:', JSON.stringify(data3));
  
-    const data2 = await res2.json();
-    console.log('start response:', JSON.stringify(data2));
- 
-    if (res2.ok) {
+    if (res3.ok) {
       showToast(`▶ ${cycle.name} arrancado`, 'success');
       wasStarted = false;
     } else {
-      // Intentar comando alternativo de arranque
+      // Intentar arranque alternativo
       await tryAlternativeStart(step, cycle);
     }
  
   } catch(e) {
-    console.error('launchStep error:', e);
+    console.error('Error:', e.message);
     showToast(`Error: ${e.message}`, 'error');
   }
 }
@@ -1375,4 +1380,3 @@ if (localStorage.getItem('activeSeq')) {
 </script>
 </body>
 </html>
- 
