@@ -742,6 +742,15 @@
   <button class="btn btn-danger" onclick="logout()">Desconectar y borrar todo</button>
 </div>
  
+<!-- DEBUG PANEL -->
+<div id="debugPanel" style="display:none;position:fixed;bottom:90px;left:10px;right:10px;background:#0a0a0a;border:1px solid #333;border-radius:10px;padding:12px;font-family:monospace;font-size:10px;color:#0f0;z-index:500;max-height:200px;overflow-y:auto">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <span style="color:#fff;font-weight:bold">DEBUG LOG</span>
+    <span onclick="document.getElementById('debugPanel').style.display='none'" style="color:#f00;cursor:pointer">✕</span>
+  </div>
+  <div id="debugLog"></div>
+</div>
+ 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div class="nav-item active" id="nav-home" onclick="showPage('home')">
@@ -788,6 +797,25 @@ const CYCLES = [
   { id: "39", name: "Solo secar",    type: "dryingOnly",  temps:[], spins:[], rinses:[], dry:["cupboard","30","60","90"], defaultTemp:"none", defaultSpin:"none", defaultRinse:"0", defaultDry:"cupboard" },
   { id: "29", name: "Sanitizar",     type: "washingOnly", temps:["70"], spins:["1200"], rinses:["2"], dry:[], defaultTemp:"70", defaultSpin:"1200", defaultRinse:"2", defaultDry:"none" },
 ];
+ 
+function debugLog(msg, color = '#0f0') {
+  const panel = document.getElementById('debugPanel');
+  const log = document.getElementById('debugLog');
+  panel.style.display = 'block';
+  const line = document.createElement('div');
+  line.style.color = color;
+  line.style.marginBottom = '4px';
+  line.style.wordBreak = 'break-all';
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+ 
+// Interceptar console.log para mostrarlo en debug panel
+const _log = console.log;
+const _err = console.error;
+console.log = (...args) => { _log(...args); debugLog(args.join(' ')); };
+console.error = (...args) => { _err(...args); debugLog(args.join(' '), '#f55'); };
  
 const DEVICE_ID_DEFAULT = "2b9fef8b-f25b-390d-4b83-75c05a49bd8a";
 let DEVICE_ID = localStorage.getItem('st_device_id') || DEVICE_ID_DEFAULT;
@@ -1023,13 +1051,20 @@ function saveSequence() {
   const name = document.getElementById('seqName').value.trim();
   if (!name) { showToast('Ponle un nombre a la secuencia', 'error'); return; }
   if (builderSteps.length === 0) { showToast('Agrega al menos un paso', 'error'); return; }
-  // Guardamos primero, LUEGO navegamos
   const stepsSnapshot = JSON.parse(JSON.stringify(builderSteps));
-  sequences.push({ name, steps: stepsSnapshot });
-  saveSequences();
-  showToast(`"${name}" guardada ✓`, 'success');
-  builderSteps = []; // limpiamos manualmente sin llamar resetBuilder
-  showPage('home'); // home no toca el builder
+  const newSeq = { name, steps: stepsSnapshot };
+  sequences.push(newSeq);
+  try {
+    localStorage.setItem('sequences', JSON.stringify(sequences));
+    console.log('Guardado OK:', JSON.stringify(sequences));
+    showToast(`"${name}" guardada ✓`, 'success');
+  } catch(e) {
+    console.error('Error al guardar:', e);
+    showToast('Error al guardar: ' + e.message, 'error');
+    return;
+  }
+  builderSteps = [];
+  showPage('home');
 }
  
 function saveSequences() {
@@ -1067,61 +1102,98 @@ async function launchStep(step) {
  
   showToast(`⏳ Enviando: ${cycle.name}...`, 'info');
  
-  // Paso 1: Seleccionar el ciclo con sus opciones
-  const setCycleCmd = [{
-    capability: "samsungce.washerCycle",
-    command: "setCycle",
-    arguments: [step.cycleId, {
-      waterTemperature: step.temp,
-      spinLevel: step.spin,
-      rinseCycle: parseInt(step.rinse),
-      dryingLevel: step.dry
-    }]
-  }];
+  // Construir opciones del ciclo
+  const cycleOptions = {};
+  if (step.temp && step.temp !== 'none') cycleOptions.waterTemperature = step.temp;
+  if (step.spin && step.spin !== 'none') cycleOptions.spinLevel = step.spin;
+  if (step.rinse) cycleOptions.rinseCycle = parseInt(step.rinse);
+  if (step.dry && step.dry !== 'none') cycleOptions.dryingLevel = step.dry;
+ 
+  // Enviar ciclo + arranque en un solo comando combinado
+  const commands = [
+    {
+      capability: "samsungce.washerCycle",
+      command: "setCycle",
+      arguments: [step.cycleId, cycleOptions]
+    },
+  ];
  
   try {
     const res1 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands: setCycleCmd })
+      body: JSON.stringify({ commands })
     });
  
+    const data1 = await res1.json();
+    console.log('setCycle response:', JSON.stringify(data1));
+ 
     if (!res1.ok) {
-      // Intentar con comando alternativo
-      await launchStepAlt(step);
+      showToast(`Error setCycle: ${data1?.message || res1.status}`, 'error');
       return;
     }
  
-    // Esperar 2 segundos y luego enviar Start
-    await new Promise(r => setTimeout(r, 2000));
+    // Esperar 2.5 segundos para que la lavadora procese el ciclo
+    await new Promise(r => setTimeout(r, 2500));
  
-    // Paso 2: Enviar comando Start
-    const startCmd = [{
-      capability: "washerOperatingState",
-      command: "setMachineState",
-      arguments: ["run"]
-    }];
+    // Comando de arranque — Samsung WD usa operatingState start
+    const startCommands = [
+      {
+        capability: "samsungce.washerOperatingState",
+        command: "start",
+        arguments: []
+      }
+    ];
  
     const res2 = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands: startCmd })
+      body: JSON.stringify({ commands: startCommands })
     });
  
+    const data2 = await res2.json();
+    console.log('start response:', JSON.stringify(data2));
+ 
     if (res2.ok) {
-      showToast(`▶ ${cycle.name} iniciado`, 'success');
-      wasStarted = false; // reset para esperar confirmación de run
+      showToast(`▶ ${cycle.name} arrancado`, 'success');
+      wasStarted = false;
     } else {
-      showToast('⚠️ Ciclo enviado. Presiona Start en la lavadora.', 'info');
+      // Intentar comando alternativo de arranque
+      await tryAlternativeStart(step, cycle);
     }
  
   } catch(e) {
-    showToast('Error al enviar comando', 'error');
+    console.error('launchStep error:', e);
+    showToast(`Error: ${e.message}`, 'error');
+  }
+}
+ 
+async function tryAlternativeStart(step, cycle) {
+  // Intentar con washerOperatingState setMachineState
+  const cmds = [
+    { capability: "washerOperatingState", command: "setMachineState", arguments: ["run"] }
+  ];
+  try {
+    const res = await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands: cmds })
+    });
+    const data = await res.json();
+    console.log('alt start response:', JSON.stringify(data));
+    if (res.ok) {
+      showToast(`▶ ${cycle.name} arrancado`, 'success');
+      wasStarted = false;
+    } else {
+      showToast(`⚠️ No se pudo arrancar automáticamente. Presiona Start en la lavadora.`, 'info');
+    }
+  } catch(e) {
+    showToast('Error al arrancar', 'error');
   }
 }
  
 async function launchStepAlt(step) {
-  // Comando alternativo usando custom.supportedOptions
+  const cycle = CYCLES.find(c => c.id === step.cycleId);
   const commands = [{
     capability: "custom.supportedOptions",
     command: "selectCourse",
@@ -1135,16 +1207,9 @@ async function launchStepAlt(step) {
     });
     if (res.ok) {
       await new Promise(r => setTimeout(r, 2000));
-      // Intentar start también
-      const startCmd = [{ capability: "washerOperatingState", command: "setMachineState", arguments: ["run"] }];
-      await fetch(`${ST_API}/devices/${DEVICE_ID}/commands`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commands: startCmd })
-      });
-      showToast(`▶ Ciclo enviado`, 'success');
+      await tryAlternativeStart(step, cycle);
     } else {
-      showToast('Activa el control remoto en la lavadora', 'error');
+      showToast('Error al seleccionar ciclo', 'error');
     }
   } catch(e) {}
 }
@@ -1310,3 +1375,4 @@ if (localStorage.getItem('activeSeq')) {
 </script>
 </body>
 </html>
+ 
